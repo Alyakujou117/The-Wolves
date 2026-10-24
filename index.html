@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <title>The Wolves</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgRnJlZSA2LjcuMiBieSBAZm9udGF3ZXNvbWUgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbSBMaWNlbnNlIC0gaHR0cHM6Ly9mb250YXdlc29tZS5jb20vbGljZW5zZS9mcmVlIChJY29uczogQ0MgQlkgNC4wLCBGb250czogU0lMIE9GTCAxLjEsIENvZGU6IE1JVCBMaWNlbnNlKSBDb3B5cmlnaHQgMjAyNCBGb250aWNvbnMsIEluYy4gLS0+PHBhdGggZD0iTTIyNi41IDkyLjljMTQuMyA0Mi45LS4zIDg2LjItMzIuNiA5Ni44cy03MC4xLTE1LjYtODQuNC01OC41cy4zLTg2LjIgMzIuNi05Ni44czcwLjEgMTUuNiA4NC40IDU4LjV6TTEwMC40IDE5OC42YzE4LjkgMzIuNCAxNC4zIDcwLjEtMTAuMiA4NC4xcy01OS43LS45LTc4LjUtMzMuM1MtMi43IDE3OS4zIDIxLjggMTY1LjNzNTkuNyAuOSA3OC41IDMzLjN6TTY5LjIgNDAxLjJDMTIxLjYgMjU5LjkgMjE0LjcgMjI0IDI1NiAyMjRzMTM0LjQgMzUuOSAxODYuOCAxNzcuMmMzLjYgOS43IDUuMiAyMC4xIDUuMiAzMC41bDAgMS42YzAgMjUuOC0yMC45IDQ2LjctNDYuNyA0Ni43Yy0xMS41IDAtMjIuOS0xLjQtMzQtNC4ybC04OC0yMmMtMTUuMy0zLjgtMzEuMy0zLjgtNDYuNiAwbC04OCAyMmMtMTEuMSAyLjgtMjIuNSA0LjItMzQgNC4yQzg0LjkgNDgwIDY0IDQ1OS4xIDY0IDQzMy4zbDAtMS42YzAtMTAuNCAxLjYtMjAuOCA1LjItMzAuNXpNNDIxLjggMjgyLjdjLTI0LjUtMTQtMjkuMS01MS43LTEwLjItODQuMXM1NC00Ny4zIDc4LjUtMzMuM3MyOS4xIDUxLjcgMTAuMiA4NC4xcy01NCA0Ny4zLTc4LjUgMzMuM3pNMzEwLjEgMTg5LjdjLTMyLjMtMTAuNi00Ni45LTUzLjktMzIuNi05Ni44czUyLjEtNjkuMSA4NC40LTU4LjVzNDYuOSA1My45IDMyLjYgOTYuOHMtNTIuMSA2OS4xLTg0LjQgNTguNXoiLz48L3N2Zz4=">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wolves - Social Deduction Game</title>
+    <!-- Locally generated stylesheet: works without internet -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+
+
+    <script src="js/icons.js"></script>
+    <link rel="stylesheet" href="css/game.css">
+
+</head>
+
+<body class="relative flex flex-col justify-between min-h-screen">
+
+    <!-- Background Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Sky visuals and transition effects -->
+    <div class="scene-sky" aria-hidden="true"><div class="sky-orb"></div><div class="sky-haze"></div><div class="sky-haze two"></div></div>
+    <div id="phaseCinematic" class="phase-cinematic" aria-hidden="true"><div class="cinematic-center">
+        <div class="cinematic-symbol"><i id="cinematicSymbol" class="fas fa-moon text-3xl"></i></div>
+        <span id="cinematicKicker" class="cinematic-kicker">A NEW NIGHT</span>
+        <span id="cinematicHeadline" class="cinematic-headline">THE HUNT BEGINS</span>
+    </div></div>
+    <div id="fxVignette" class="fx-vignette" aria-hidden="true"></div>
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header
+        class="relative z-10 w-full px-6 py-4 flex items-center justify-between border-b border-white/10 backdrop-blur-md bg-slate-950/30">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="returnToMainMenu()">
+            <div
+                class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 text-lg shadow-lg">
+                <i class="fas fa-paw"></i>
+            </div>
+            <div>
+                <h1 class="font-serif text-xl sm:text-2xl font-bold tracking-wider text-slate-100 uppercase">The Wolves
+                </h1>
+                <p id="headerSubtitle" class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Social
+                    Deduction Engine</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <!-- Original soundtrack control -->
+            <button id="musicBtn" onclick="toggleMusic()" aria-label="Toggle background music" aria-pressed="true"
+                class="wolf-btn px-3 py-2 text-xs font-bold flex items-center space-x-2">
+                <i id="musicIcon" class="fas fa-music text-amber-400"></i>
+                <span id="musicLabel" class="hidden sm:inline text-slate-300">Music On</span>
+            </button>
+
+            <!-- Ambience Audio Toggle -->
+            <button id="ambienceBtn" onclick="toggleAmbience()"
+                class="wolf-btn px-3 py-2 text-xs font-bold flex items-center space-x-2">
+                <i id="ambienceIcon" class="fas fa-wind text-slate-400"></i>
+                <span id="ambienceLabel" class="hidden sm:inline text-slate-300">Ambience Off</span>
+            </button>
+
+            <!-- SFX Mute Toggle -->
+            <button id="sfxBtn" onclick="toggleSFX()"
+                class="wolf-btn px-3 py-2 text-xs font-bold flex items-center space-x-2">
+                <i id="sfxIcon" class="fas fa-volume-high text-blue-400"></i>
+            </button>
+
+            <!-- Volume and motion settings -->
+            <button id="audioSettingsBtn" onclick="openModal('audioSettingsModal')" title="Audio and animation settings"
+                aria-label="Audio and animation settings" class="wolf-btn px-3 py-2 text-xs font-bold flex items-center">
+                <i class="fas fa-sliders text-slate-300"></i>
+            </button>
+
+            <!-- Rulebook Modal -->
+            <button onclick="openModal('rulesModal')"
+                class="wolf-btn px-3 py-2 text-xs font-bold flex items-center space-x-2">
+                <i class="fas fa-book-open text-amber-400"></i>
+                <span class="hidden sm:inline">Rules</span>
+            </button>
+        </div>
+    </header>
+
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="relative z-10 flex-grow flex items-center justify-center p-4 sm:p-6 max-w-5xl mx-auto w-full">
+
+        <!-- ================= VIEW 1: MAIN MENU & ADVANCED SETUP ================= -->
+        <section id="viewSetup" class="w-full max-w-2xl py-6 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 rounded-full bg-slate-900/60 border border-slate-700/50 shadow-xl mb-2">
+                    <i class="fas fa-moon text-3xl text-blue-400 animate-pulse"></i>
+                </div>
+                <h2 class="font-serif text-4xl sm:text-5xl font-black text-slate-100 tracking-wider">THE WOLVES</h2>
+                <p class="text-xs sm:text-sm text-slate-400 tracking-widest uppercase font-medium">Customizable Social
+                    Deduction & Role Control</p>
+            </div>
+
+            <div class="wolf-card p-6 space-y-6">
+                <!-- Mode Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Game
+                        Mode</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="modeBtnSolo" onclick="setGameMode('solo')"
+                            class="wolf-btn p-4 text-left flex flex-col justify-between border-blue-400 bg-blue-500/10">
+                            <i class="fas fa-robot text-blue-400 text-lg mb-2"></i>
+                            <div>
+                                <h3 class="font-bold text-sm text-white">Solo vs AI</h3>
+                                <p class="text-[11px] text-slate-400">Play against smart AI bots with custom roles.</p>
+                            </div>
+                        </button>
+
+                        <button id="modeBtnPass" onclick="setGameMode('pass')"
+                            class="wolf-btn p-4 text-left flex flex-col justify-between">
+                            <i class="fas fa-users text-amber-400 text-lg mb-2"></i>
+                            <div>
+                                <h3 class="font-bold text-sm text-white">Pass & Play</h3>
+                                <p class="text-[11px] text-slate-400">Single device for 4-16 local players with role
+                                    peek.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player Count Control -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Total Player
+                            Count</label>
+                        <span id="playerCountLabel" class="text-sm font-bold text-blue-400">7 Players</span>
+                    </div>
+                    <input type="range" id="playerCountRange" min="4" max="16" value="7"
+                        oninput="updatePlayerCount(this.value)"
+                        class="w-full accent-blue-400 bg-slate-800 h-2 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Custom Role Selector Quantities -->
+                <div class="space-y-3 border-t border-slate-800 pt-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Role Distribution
+                            Control</label>
+                        <button onclick="resetDefaultRoles()" class="text-[11px] text-blue-400 hover:underline"><i
+                                class="fas fa-rotate-left mr-1"></i>Reset Default</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Wolves Selector -->
+                        <div
+                            class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-paw text-red-400 text-base"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Wolves (Mafia)</p>
+                                    <p class="text-[10px] text-slate-400">Night eliminators</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustRoleCount('wolves', -1)" class="counter-btn">-</button>
+                                <span id="wolvesCountText" class="text-xs font-bold w-4 text-center">2</span>
+                                <button onclick="adjustRoleCount('wolves', 1)" class="counter-btn">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Healer Selector -->
+                        <div
+                            class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-heart text-emerald-400 text-base"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Healer (Doctor)</p>
+                                    <p class="text-[10px] text-slate-400">Protects night targets</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustRoleCount('healers', -1)" class="counter-btn">-</button>
+                                <span id="healersCountText" class="text-xs font-bold w-4 text-center">1</span>
+                                <button onclick="adjustRoleCount('healers', 1)" class="counter-btn">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Seer Selector -->
+                        <div
+                            class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-eye text-blue-400 text-base"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Seer (Detective)</p>
+                                    <p class="text-[10px] text-slate-400">Inspects alignment</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustRoleCount('seers', -1)" class="counter-btn">-</button>
+                                <span id="seersCountText" class="text-xs font-bold w-4 text-center">1</span>
+                                <button onclick="adjustRoleCount('seers', 1)" class="counter-btn">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Hunter Selector -->
+                        <div
+                            class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-crosshairs text-amber-400 text-base"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Hunter (Guard)</p>
+                                    <p class="text-[10px] text-slate-400">Takes target down on death</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustRoleCount('hunters', -1)" class="counter-btn">-</button>
+                                <span id="huntersCountText" class="text-xs font-bold w-4 text-center">1</span>
+                                <button onclick="adjustRoleCount('hunters', 1)" class="counter-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auto Villagers Box -->
+                    <div
+                        class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 flex items-center justify-between text-xs">
+                        <span class="text-slate-400"><i class="fas fa-user text-slate-300 mr-1.5"></i>Villagers
+                            (Remaining Spots):</span>
+                        <span id="villagersCountText" class="font-bold text-amber-400">2 Villagers</span>
+                    </div>
+
+                    <!-- Balance Check Indicator -->
+                    <div id="balanceWarningBox"
+                        class="p-3 rounded-xl border text-xs font-semibold flex items-center space-x-2">
+                        <i id="balanceIcon" class="fas fa-check-circle"></i>
+                        <span id="balanceText">Game balance look good!</span>
+                    </div>
+                </div>
+
+                <!-- Doctor Healing Limit Settings -->
+                <div class="space-y-3 border-t border-slate-800 pt-4">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Doctor / Healer
+                        Protection Limit Rules</label>
+                    <select id="doctorHealLimitSelect" onchange="updateDoctorRuleSetting(this.value)"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                        <option value="unlimited">Unlimited Heals (Can protect anyone every night)</option>
+                        <option value="no_consecutive">No Consecutive Saves (Cannot save same player twice in a row)
+                        </option>
+                        <option value="no_self">Cannot Protect Self</option>
+                        <option value="max_1">Max 1 Successful Heal Per Game</option>
+                        <option value="max_2">Max 2 Successful Heals Per Game</option>
+                    </select>
+                </div>
+
+                <!-- Healer Save Identity Disclosure -->
+                <div class="space-y-2 border-t border-slate-800 pt-4">
+                    <label for="healerSaveDisclosureSelect"
+                        class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Healer Save
+                        Announcement</label>
+                    <select id="healerSaveDisclosureSelect" onchange="updateHealerSaveDisclosure(this.value)"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                        <option value="reveal">Reveal the protected player's name</option>
+                        <option value="secret">Keep the protected player's name secret</option>
+                    </select>
+                    <p class="text-[11px] text-slate-500">Choose whether the morning announcement identifies the player
+                        saved by the Healer.</p>
+                </div>
+
+                <!-- Custom Role Ability Limits: Hunter Shots & Seer Inspections -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-800 pt-4">
+                    <!-- Seer Inspection Limits -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Seer
+                            Inspections</label>
+                        <select id="seerLimitSelect" onchange="updateSeerRuleSetting(this.value)"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                            <option value="unlimited">Unlimited (1 per night)</option>
+                            <option value="max_1">Max 1 Inspection Total</option>
+                            <option value="max_2">Max 2 Inspections Total</option>
+                            <option value="max_3">Max 3 Inspections Total</option>
+                        </select>
+                    </div>
+
+                    <!-- Hunter Shot Limits -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Hunter Ammo /
+                            Shots</label>
+                        <select id="hunterLimitSelect" onchange="updateHunterRuleSetting(this.value)"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                            <option value="max_1">1 Shot Total</option>
+                            <option value="max_2">2 Shots Total</option>
+                            <option value="max_3">3 Shots Total</option>
+                            <option value="unlimited">Unlimited Shots</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Custom Player Names (Pass & Play) or Human Name (Solo) -->
+                <div id="playerNamesContainer" class="space-y-2 border-t border-slate-800 pt-4">
+                    <!-- Dynamic Player Inputs appended via JS -->
+                </div>
+
+                <!-- Start Button -->
+                <button id="startGameBtn" onclick="startGame()"
+                    class="wolf-btn wolf-btn-primary w-full py-4 text-sm font-serif font-bold tracking-widest uppercase flex items-center justify-center space-x-2">
+                    <i class="fas fa-play text-xs"></i>
+                    <span>BEGIN GAME</span>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 2: SECRET ROLE REVEAL (PASS & PLAY) ================= -->
+        <section id="viewRoleReveal" class="w-full max-w-md py-6 hidden">
+            <div class="wolf-card p-8 text-center space-y-6 relative overflow-y-auto">
+                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Pass Device To</div>
+                <h2 id="revealPlayerName" class="font-serif text-3xl font-extrabold text-blue-400">Player 1</h2>
+                <div id="roleCardHolder" role="button" tabindex="0" aria-label="Tap to reveal or hide your secret role"
+                    onclick="toggleSecretRole()"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();toggleSecretRole();}"
+                    class="p-8 rounded-2xl bg-slate-900/90 border border-slate-700/60 min-h-[220px] flex flex-col items-center justify-center space-y-3 group cursor-pointer select-none">
+                    <div id="roleCardBack" class="space-y-3">
+                        <i class="fas fa-shield-halved text-4xl text-slate-500"></i>
+                        <p class="text-xs text-slate-400 font-medium">Tap this card or the button below to reveal your
+                            secret role.</p>
+                    </div>
+                    <div id="roleCardFront" class="hidden space-y-3">
+                        <i id="roleIcon" class="fas fa-user text-5xl text-slate-300"></i>
+                        <h3 id="roleTitle" class="font-serif text-2xl font-bold uppercase tracking-wider">Villager</h3>
+                        <p id="roleDesc" class="text-sm text-slate-300"></p>
+                        <p id="wolfTeammates" class="hidden text-xs font-bold text-red-300"></p>
+                    </div>
+                </div>
+                <button id="revealRoleBtn" onclick="toggleSecretRole()"
+                    class="wolf-btn wolf-btn-primary w-full py-3 text-xs font-bold uppercase tracking-wider">
+                    <i class="fas fa-eye mr-2"></i> Tap to Reveal Role
+                </button>
+                <button onclick="nextPlayerRole()"
+                    class="wolf-btn w-full py-3 text-xs font-bold uppercase tracking-wider">
+                    Next Player <i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 3: NIGHT PHASE ================= -->
+        <section id="viewNight" class="w-full max-w-3xl py-6 space-y-6 hidden">
+            <!-- Phase Header Banner -->
+            <div id="nightHeaderCard"
+                class="wolf-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-blue-500/30 transition-all duration-500">
+                <div class="flex items-center space-x-4">
+                    <div id="nightIconHolder"
+                        class="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-2xl shadow-inner transition-colors duration-500">
+                        <i id="nightPhaseIcon" class="fas fa-moon"></i>
+                    </div>
+                    <div>
+                        <span id="nightStepBadge"
+                            class="text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-400/20 transition-all duration-500">Night
+                            1 &bull; Wolves Turn</span>
+                        <h2 id="nightStepTitle" class="font-serif text-2xl font-bold text-white mt-1">The Wolves Hunt
+                        </h2>
+                    </div>
+                </div>
+                <p id="nightInstructions" class="text-xs text-slate-300 max-w-xs sm:text-right leading-relaxed">
+                    Wolves wake up. Agree on one target to eliminate from the pack.
+                </p>
+            </div>
+
+            <!-- Active Role Indicator Banner -->
+            <div id="roleTurnIndicator"
+                class="p-3.5 rounded-2xl border flex items-center justify-between font-bold text-xs uppercase tracking-wider transition-all duration-500 bg-slate-900/90 shadow-xl">
+                <div class="flex items-center space-x-2.5">
+                    <span class="relative flex h-3 w-3">
+                        <span id="activeRolePing"
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span id="activeRoleDot" class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                    <span id="activeTurnLabel" class="text-slate-200">Current Turn: <span id="activeRoleName"
+                            class="text-red-400 font-extrabold ml-1">WOLVES</span></span>
+                </div>
+                <span id="activeTurnHint"
+                    class="text-[11px] text-slate-400 font-normal lowercase tracking-normal">Perform action below</span>
+            </div>
+
+            <!-- Interactive Target Grid -->
+            <div id="nightInteractiveBox" class="wolf-card p-6 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 id="nightGridHeading" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select A
+                        Target</h3>
+                    <span id="nightRuleNotice" class="text-[11px] text-amber-400 font-semibold hidden"></span>
+                </div>
+
+                <div id="nightPlayerGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <!-- Dynamic Player Cards -->
+                </div>
+
+                <!-- Night Action Confirm / Complete Buttons -->
+                <div class="pt-4 flex justify-between items-center">
+                    <button id="hideSeerTurnBtn" onclick="hideAndCompleteSeerTurn()"
+                        class="wolf-btn px-6 py-3 text-xs font-serif font-bold tracking-widest uppercase text-slate-300 hidden">
+                        <i class="fas fa-user-shield mr-2"></i> Hide & Finish Turn
+                    </button>
+
+                    <button id="confirmNightActionBtn" onclick="submitNightStep()"
+                        class="wolf-btn wolf-btn-primary px-8 py-3 text-xs font-serif font-bold tracking-widest uppercase flex items-center space-x-2">
+                        <span>Confirm Action</span>
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 4: DAY PHASE (DISCUSSION & VOTE) ================= -->
+        <section id="viewDay" class="w-full max-w-4xl py-6 space-y-6 hidden">
+            <!-- Day Banner & Morning Announcement -->
+            <div id="morningAnnouncementBox" class="wolf-card p-6 border-amber-500/30 bg-amber-950/20">
+                <div class="flex items-center space-x-3 text-amber-400 mb-2">
+                    <i class="fas fa-sun text-xl"></i>
+                    <h2 class="font-serif text-xl font-bold uppercase tracking-wider">Morning Has Broken</h2>
+                </div>
+                <p id="morningNewsText" class="text-sm text-slate-200 leading-relaxed font-medium">
+                    The pack awakens to the cold morning mist...
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Discussion & Voting Column -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Timer & Voting Controls -->
+                    <div class="wolf-card p-6 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Discussion
+                                Phase</span>
+                            <div id="timerDisplay" class="font-serif text-3xl font-bold text-amber-400">02:00</div>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <button id="skipTimerBtn" onclick="skipDiscussionTimer()"
+                                class="wolf-btn px-4 py-2.5 text-xs font-bold flex items-center space-x-2">
+                                <i class="fas fa-forward text-slate-400"></i>
+                                <span>Proceed to Vote</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Voting Player Card Grid -->
+                    <div class="wolf-card p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 id="votingSectionTitle"
+                                class="text-xs font-bold text-slate-300 uppercase tracking-wider">Cast Your Banishment
+                                Vote</h3>
+                            <span id="voteStatusBadge"
+                                class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full font-bold">Discussion
+                                Active</span>
+                        </div>
+
+                        <div id="dayPlayerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <!-- Dynamic Voting Buttons -->
+                        </div>
+
+                        <div class="pt-4 flex justify-end">
+                            <button id="submitVoteBtn" onclick="submitDayVote()" disabled
+                                class="wolf-btn wolf-btn-danger px-8 py-3 text-xs font-serif font-bold tracking-widest uppercase flex items-center space-x-2">
+                                <i class="fas fa-gavel text-xs"></i>
+                                <span>Cast Vote</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discussion Log / Bot Accusation Chat -->
+                <div class="wolf-card p-5 flex flex-col h-[480px]">
+                    <div class="pb-3 border-b border-slate-800 flex items-center justify-between">
+                        <h3
+                            class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fas fa-comments text-amber-400"></i>
+                            <span>Pack Debate Log</span>
+                        </h3>
+                    </div>
+
+                    <!-- Chat Log Messages -->
+                    <div id="chatLog" class="flex-grow overflow-y-auto py-3 space-y-3 pr-1 text-xs">
+                        <div class="text-slate-500 italic text-center text-[11px] py-2">Night has ended. Begin
+                            discussion.</div>
+                    </div>
+
+                    <!-- Human Input (Solo vs AI Mode) -->
+                    <div id="chatInputArea" class="pt-3 border-t border-slate-800 flex space-x-2 hidden">
+                        <input type="text" id="humanChatMessage" placeholder="Accuse or defend yourself..."
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                        <button onclick="sendHumanChatMessage()" class="wolf-btn px-3 py-2 text-xs text-amber-400">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 5: GAME OVER & STATS ================= -->
+        <section id="viewGameOver" class="w-full max-w-2xl py-6 space-y-6 hidden">
+            <div class="wolf-card p-8 text-center space-y-6 relative overflow-hidden">
+                <div id="victoryConfetti" aria-hidden="true"></div>
+                <div id="winnerBannerIcon"
+                    class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-4xl shadow-2xl animate-bounce">
+                    <i class="fas fa-trophy"></i>
+                </div>
+
+                <div>
+                    <span id="winnerTeamTag"
+                        class="text-xs font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-400/30">TOWN
+                        VICTORY</span>
+                    <h2 id="winnerTitle" class="font-serif text-4xl font-black text-white mt-3">THE VILLAGERS SURVIVED
+                    </h2>
+                    <p id="winnerSub" class="text-xs text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">All wolves
+                        have been banished from the pack.</p>
+                </div>
+
+                <!-- Full Player Role Table -->
+                <div class="pt-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider text-left mb-3">Pack Roles
+                        Recap</h3>
+                    <div id="recapRoleList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Dynamic Recap List -->
+                    </div>
+                </div>
+
+                <!-- Play Again -->
+                <button onclick="returnToMainMenu()"
+                    class="wolf-btn wolf-btn-primary w-full py-4 text-xs font-serif font-bold tracking-widest uppercase">
+                    PLAY AGAIN
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Role-turn privacy shield retained from the original game.
+         Moved outside the changing game views so it also covers daytime private votes. -->
+            <!-- FULL-SCREEN PRIVACY OVERLAY FOR EVERY NIGHT ROLE (PASS & PLAY) -->
+            <div id="seerPrivacyShield"
+                class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/95 p-4" role="dialog"
+                aria-modal="true" aria-labelledby="seerPrivacyName">
+                <div class="wolf-card w-full max-w-lg p-8 text-center space-y-5 border-blue-500/40 shadow-2xl">
+                    <div
+                        class="w-16 h-16 mx-auto rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-3xl animate-pulse">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    <h3 id="seerPrivacyName" class="font-serif text-2xl font-bold text-white">Pass Device To The Active
+                        Role</h3>
+                    <p id="privacyShieldInstructions" class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                        Pass the device privately. Only the role whose turn it is should reveal the night-action screen.
+                    </p>
+                    <button id="revealNightRoleBtn" onclick="revealNightRoleScreen()"
+                        class="wolf-btn wolf-btn-primary px-8 py-3 text-xs font-serif font-bold tracking-widest uppercase">
+                        <i class="fas fa-eye mr-2"></i> I Am This Role — Reveal Turn
+                    </button>
+                </div>
+            </div>
+
+
+
+
+    <!-- Additional mobile control; the original desktop Cast Vote button is retained. -->
+    <div id="mobileVoteDock" class="mobile-vote-dock" aria-label="Mobile voting controls">
+        <div class="mobile-vote-dock-inner">
+            <div class="mobile-vote-dock-copy">
+                <span class="mobile-vote-dock-eyebrow">YOUR BALLOT</span>
+                <span id="mobileVoteHint" class="mobile-vote-dock-hint" aria-live="polite">Select a player to cast a vote</span>
+            </div>
+            <button id="mobileSubmitVoteBtn" type="button" class="wolf-btn wolf-btn-danger mobile-vote-submit"
+                onclick="submitDayVote()" disabled aria-label="Cast vote for selected player">
+                <i class="fas fa-gavel" aria-hidden="true"></i><span>Cast Vote</span>
+            </button>
+        </div>
+    </div>
+
+        <!-- ================= MODALS ================= -->
+
+    <!-- HUNTER REVENGE MODAL -->
+    <div id="hunterModal"
+        class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="modal-box wolf-card w-full max-w-md p-6 text-center space-y-4 border-amber-500/40">
+            <div
+                class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-3xl">
+                <i class="fas fa-crosshairs"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-white">Hunter's Last Stand</h3>
+            <p id="hunterModalDesc" class="text-xs text-slate-300">
+                The Hunter has been eliminated! As their final act, they may target another player to take down with
+                them.
+            </p>
+
+            <div id="hunterTargetGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
+                <!-- Dynamic hunter targets -->
+            </div>
+
+            <button id="confirmHunterShootBtn" onclick="confirmHunterShot()" disabled
+                class="wolf-btn wolf-btn-danger w-full py-3 text-xs font-bold uppercase tracking-wider">
+                Fire Final Shot
+            </button>
+        </div>
+    </div>
+
+
+    <!-- SEER INSPECTION RESULT MODAL -->
+    <div id="seerModal"
+        class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+        <div class="modal-box wolf-card w-full max-w-sm p-6 text-center space-y-4 border-blue-500/50">
+            <div
+                class="w-14 h-14 mx-auto rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-2xl">
+                <i class="fas fa-eye"></i>
+            </div>
+            <span
+                class="text-[10px] uppercase font-extrabold tracking-widest text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-400/20">CONFIDENTIAL
+                TO SEER ONLY</span>
+            <h3 class="font-serif text-xl font-bold text-white">Divine Identity Result</h3>
+            <p class="text-xs text-slate-300">You inspected <span id="seerTargetName"
+                    class="font-bold text-white">Player</span>.</p>
+
+            <div id="seerResultBadge"
+                class="p-4 rounded-xl font-serif text-lg font-bold uppercase tracking-wider bg-slate-900 border border-slate-700">
+                INNOCENT
+            </div>
+
+            <button onclick="closeModal('seerModal');"
+                class="wolf-btn wolf-btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider">
+                Acknowledge & Close
+            </button>
+        </div>
+    </div>
+
+
+    <!-- ELIMINATION ANNOUNCEMENT MODAL -->
+    <div id="eliminationModal"
+        class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="modal-box wolf-card w-full max-w-md p-6 text-center space-y-4 border-red-500/40">
+            <div
+                class="w-16 h-16 mx-auto rounded-full bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 text-3xl">
+                <i class="fas fa-gavel"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-white">Pack Verdict</h3>
+            <p id="eliminationDesc" class="text-xs text-slate-300 leading-relaxed">
+                The pack has spoken. Player X has been banished.
+            </p>
+
+            <div id="eliminatedRoleBox"
+                class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200">
+                Their role was: <span id="eliminatedRoleName" class="text-amber-400">VILLAGER</span>
+            </div>
+
+            <button onclick="closeModal('eliminationModal'); handlePostElimination();"
+                class="wolf-btn wolf-btn-danger w-full py-3 text-xs font-bold uppercase tracking-wider">
+                Continue
+            </button>
+        </div>
+    </div>
+
+
+    <!-- AUDIO AND ANIMATION SETTINGS -->
+    <div id="audioSettingsModal" class="modal-overlay fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md" role="dialog" aria-modal="true" aria-label="Audio and animation settings">
+        <div class="modal-box wolf-card w-full max-w-md p-6 sm:p-7 space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <div><h2 class="font-serif text-lg font-bold text-white"><i class="fas fa-sliders text-amber-400 mr-2"></i>Atmosphere Settings</h2>
+                    <p class="text-[11px] text-slate-400 mt-1">Personalize your music, sound and motion.</p></div>
+                <button onclick="closeModal('audioSettingsModal')" aria-label="Close settings" class="wolf-btn p-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="space-y-5">
+                <div class="audio-setting"><label for="musicVolume">Music</label><input id="musicVolume" type="range" min="0" max="100" value="36" oninput="setVolume('music',this.value)"><output id="musicVolumeLabel" for="musicVolume">36%</output></div>
+                <div class="audio-setting"><label for="sfxVolume">Sound Effects</label><input id="sfxVolume" type="range" min="0" max="100" value="64" oninput="setVolume('sfx',this.value)"><output id="sfxVolumeLabel" for="sfxVolume">64%</output></div>
+                <div class="audio-setting"><label for="windVolume">Wind Ambience</label><input id="windVolume" type="range" min="0" max="100" value="30" oninput="setVolume('wind',this.value)"><output id="windVolumeLabel" for="windVolume">30%</output></div>
+                <div class="pt-4 border-t border-slate-700"><label class="audio-check"><input id="reduceMotionToggle" type="checkbox" onchange="setMotionPreference(this.checked)"><span>Reduce motion and screen effects</span></label></div>
+            </div>
+            <p class="text-[11px] text-slate-400">Music begins after you interact with the game, as required by modern browsers. Turn it off any time using the music button.</p>
+            <button onclick="closeModal('audioSettingsModal')" class="wolf-btn wolf-btn-primary w-full py-3 text-xs font-bold uppercase tracking-wider">Done</button>
+        </div>
+    </div>
+
+    <!-- RULEBOOK MODAL -->
+    <div id="rulesModal"
+        class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="modal-box wolf-card w-full max-w-lg p-6 sm:p-8 space-y-5">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <h2 class="font-serif text-xl font-bold text-white flex items-center space-x-2">
+                    <i class="fas fa-book-open text-amber-400"></i>
+                    <span>Rules of The Wolves</span>
+                </h2>
+                <button onclick="closeModal('rulesModal')" class="text-slate-400 hover:text-white"><i
+                        class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-4 text-xs text-slate-300 max-h-[60vh] overflow-y-auto pr-1">
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wider mb-1">Game Objective</h4>
+                    <p class="leading-relaxed">The Villagers must identify and banish all Wolves before the Wolves equal
+                        or outnumber the remaining Villagers.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-white uppercase tracking-wider">Roles Legend</h4>
+
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+                        <p class="font-bold text-red-400 flex items-center"><i class="fas fa-paw mr-2"></i> Wolves</p>
+                        <p class="text-[11px] text-slate-400">Eliminate one player each night. Blend in during day
+                            discussions.</p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+                        <p class="font-bold text-blue-400 flex items-center"><i class="fas fa-eye mr-2"></i> Seer
+                            (Detective)</p>
+                        <p class="text-[11px] text-slate-400">Inspect one player each night to discover if they are a
+                            Wolf or Innocent.</p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+                        <p class="font-bold text-emerald-400 flex items-center"><i class="fas fa-heart mr-2"></i> Healer
+                            (Doctor)</p>
+                        <p class="text-[11px] text-slate-400">Protects players from Wolf attacks. Subject to custom
+                            doctor settings in setup.</p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+                        <p class="font-bold text-amber-400 flex items-center"><i class="fas fa-crosshairs mr-2"></i>
+                            Hunter (Guard)</p>
+                        <p class="text-[11px] text-slate-400">Takes a night turn to shoot. If they target a Wolf, the
+                            Wolf is eliminated! If eliminated, they fire a final revenge shot.</p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+                        <p class="font-bold text-slate-300 flex items-center"><i class="fas fa-user mr-2"></i> Villager
+                        </p>
+                        <p class="text-[11px] text-slate-400">No special night powers. Use debate and logic to spot liar
+                            behavior and vote correctly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeModal('rulesModal')"
+                class="wolf-btn wolf-btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider">
+                Got It
+            </button>
+        </div>
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 py-3 text-center text-[11px] text-slate-500 border-t border-white/5 backdrop-blur-md">
+        The Wolves &bull; Social Deduction Platform
+    </footer>
+
+
+    <!-- ================= JAVASCRIPT GAME ENGINE ================= -->
+    <script src="js/game.js"></script>
+</body>
+
+</html>

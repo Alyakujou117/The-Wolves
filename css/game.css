@@ -1,0 +1,381 @@
+
+        i.fas{display:inline-flex;vertical-align:-.1em;align-items:center;justify-content:center;line-height:1;}
+        i.fas svg{height:1em;width:1em;fill:currentColor;display:inline-block;flex-shrink:0;}
+        i.fas.fa-shield-halved svg,i.fas.fa-book-open svg{height:1em;width:1.15em;}
+        :root {
+            --bg-night-1: #090D16;
+            --bg-night-2: #121A2D;
+            --bg-day-1: #1E120B;
+            --bg-day-2: #362215;
+            --accent-blue: #60A5FA;
+            --accent-gold: #F59E0B;
+            --accent-red: #EF4444;
+            --accent-green: #10B981;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(148, 163, 184, 0.2);
+            --shadow-color: rgba(2, 6, 23, 0.7);
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 20%, var(--bg-night-2) 0%, var(--bg-night-1) 100%);
+            color: #F1F5F9;
+            font-family: 'Quicksand', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+            transition: background 1.2s ease, color 1.2s ease;
+        }
+
+        body.day-phase {
+            background: radial-gradient(circle at 50% 20%, var(--bg-day-2) 0%, var(--bg-day-1) 100%);
+        }
+
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Keep the pass-and-play role reveal usable on short screens and when wolf
+           teammate names make the revealed card taller than usual. */
+        #viewRoleReveal>.wolf-card {
+            max-height: calc(100dvh - 2rem);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        #roleCardHolder {
+            min-height: 180px;
+            max-height: 38dvh;
+            overflow-y: auto;
+            overflow-wrap: anywhere;
+            flex-shrink: 1;
+        }
+
+        #roleCardFront {
+            width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        #revealRoleBtn,
+        #viewRoleReveal button[onclick="nextPlayerRole()"] {
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+        }
+
+        @media (max-height: 720px) {
+            #viewRoleReveal>.wolf-card {
+                padding: 1.25rem;
+                gap: 1rem;
+            }
+
+            #roleCardHolder {
+                max-height: 32dvh;
+                min-height: 140px;
+                padding: 1.25rem;
+            }
+        }
+
+        /* Glassmorphism Cards */
+        .wolf-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 40px -10px var(--shadow-color), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            border-radius: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Buttons */
+        .wolf-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: #F1F5F9;
+            border-radius: 1rem;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wolf-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: rgba(96, 165, 250, 0.15);
+            border-color: var(--accent-blue);
+            box-shadow: 0 8px 20px -5px rgba(96, 165, 250, 0.3);
+            color: #FFFFFF;
+        }
+
+        .wolf-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .wolf-btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+            border: 1px solid #60A5FA;
+            color: #FFFFFF !important;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .wolf-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
+            box-shadow: 0 12px 30px -5px rgba(96, 165, 250, 0.6);
+        }
+
+        .wolf-btn-danger {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            border: 1px solid #EF4444;
+            color: #FFFFFF !important;
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+        }
+
+        .wolf-btn-danger:hover:not(:disabled) {
+            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+            box-shadow: 0 12px 30px -5px rgba(239, 68, 68, 0.6);
+        }
+
+        .wolf-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Counter Buttons */
+        .counter-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .counter-btn:hover:not(:disabled) {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60A5FA;
+        }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            transform: scale(0.92) translateY(15px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Active Turn Highlights */
+        .turn-highlight-wolves {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+            border-color: rgba(239, 68, 68, 0.6) !important;
+        }
+
+        .turn-highlight-healer {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+            border-color: rgba(16, 185, 129, 0.6) !important;
+        }
+
+        .turn-highlight-seer {
+            box-shadow: 0 0 25px rgba(96, 165, 250, 0.35);
+            border-color: rgba(96, 165, 250, 0.6) !important;
+        }
+
+        .turn-highlight-hunter {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+            border-color: rgba(245, 158, 11, 0.6) !important;
+        }
+        /* THE WOLVES: THEATRICAL VISUAL UPDATE — respects motion settings */
+:root { --fx-strength: 1; }
+body { isolation:isolate; }
+#particleCanvas { z-index:-1; }
+.scene-sky { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.sky-orb { position:absolute; width:clamp(110px,16vw,215px); height:clamp(110px,16vw,215px); right:6%; top:7%; border-radius:50%; background:radial-gradient(circle at 32% 29%,#f3f2e9 0 7%,#cad8ec 38%,#839abf 65%,#2d4d7a 100%); opacity:.17; box-shadow:0 0 45px 14px #8caeff22,0 0 135px 45px #5385cf20,inset -16px -22px 35px #202f55; filter:blur(.2px); animation:skyfloat 14s ease-in-out infinite alternate,moonshine 8s ease-in-out infinite alternate; transition:all 2s ease; }
+.sky-orb::after {content:"";position:absolute;width:19%;height:19%;top:26%;left:45%;border-radius:50%;box-shadow:-37px 44px 0 8px #48618522, -12px 76px 0 -3px #55729726,8px -5px 0 3px #506c9533;}
+.day-phase .sky-orb { background:radial-gradient(circle at 37% 36%,#fff6c6 0%,#ffe5a5 45%,#fead52 83%); opacity:.36; box-shadow:0 0 70px 22px #ffbc6230,0 0 150px 66px #e9a03514; }
+.day-phase .sky-orb::after{ display:none; }
+.sky-haze { position:absolute; width:150%;left:-25%; height:25%; bottom:-8%; background:radial-gradient(ellipse at 50% 60%,#4c729a24,transparent 72%); filter:blur(22px); animation:mistdrift 19s ease-in-out infinite alternate; }
+.sky-haze.two { bottom:14%;height:18%;animation-duration:25s;animation-direction:alternate-reverse;opacity:.55; }
+.day-phase .sky-haze{background:radial-gradient(ellipse at 50% 60%,#f7a5531c,transparent 72%);}
+@keyframes skyfloat { from{transform:translateY(-9px) translateX(-8px)} to{transform:translateY(13px) translateX(7px)} }
+@keyframes moonshine { from{filter:brightness(.9)} to{filter:brightness(1.13)} }
+@keyframes mistdrift { from{transform:translateX(-5%) scale(1)} to{transform:translateX(5%) scale(1.15)} }
+#viewSetup:not(.hidden),#viewNight:not(.hidden),#viewDay:not(.hidden),#viewGameOver:not(.hidden),#viewRoleReveal:not(.hidden){ animation:sceneEntrance .65s cubic-bezier(.18,.84,.3,1) both; }
+@keyframes sceneEntrance {from{opacity:0;transform:translateY(18px) scale(.987);filter:blur(6px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.wolf-card{ position:relative; }
+#viewSetup > .wolf-card:after { content:""; position:absolute; left:7%;right:7%;top:-1px;height:1px; background:linear-gradient(90deg,transparent,#94b9fd79,transparent); pointer-events:none; }
+#winnerBannerIcon{animation:winIconGlow 2.1s ease-in-out infinite alternate !important;}
+@keyframes winIconGlow {from{transform:scale(1) rotate(-3deg);box-shadow:0 0 18px #dba83b25}to{transform:scale(1.09) rotate(3deg);box-shadow:0 0 38px #dba83b59}}
+#roleCardHolder{ transform-style:preserve-3d; transition:border-color .26s, box-shadow .3s, background .3s; }
+#roleCardHolder.role-flip { animation:roleFlip .62s cubic-bezier(.23,.75,.2,1) both; }
+#roleCardHolder.role-revealed { border-color:#c5a36e9e; background:radial-gradient(circle at 50% 10%, #57431c4d,#0f172ae6 75%); box-shadow:inset 0 0 32px #d5a55a15,0 0 25px #d3ad5430; }
+@keyframes roleFlip {0%{transform:rotateY(0) scale(.96)}45%{transform:rotateY(86deg) scale(.92)}100%{transform:rotateY(0deg) scale(1)}}
+.wolf-btn::after {content:"";position:absolute;inset:0; background:linear-gradient(100deg,transparent 10%,#ffffff1a 50%,transparent 88%); transform:translateX(-130%); transition:transform .55s ease;pointer-events:none;}
+.wolf-btn:hover::after{transform:translateX(130%)}
+.wolf-btn.tap-burst{animation:tapBurst .3s ease-out;}
+@keyframes tapBurst{0%{filter:brightness(1.5)}60%{filter:brightness(1.12)}100%{filter:brightness(1)}}
+#nightHeaderCard{animation:nightGlow 4.5s ease-in-out infinite alternate;}
+@keyframes nightGlow{from{box-shadow:0 0 17px #19365b2a,0 16px 40px #0005}to{box-shadow:0 0 34px #2e559744,0 16px 40px #0005}}
+#nightPlayerGrid > div,#dayPlayerGrid > button,#hunterTargetGrid > button{transition:transform .22s ease,box-shadow .25s,border-color .25s,background-color .25s;}
+#nightPlayerGrid > div:not(.opacity-40):hover,#dayPlayerGrid > button:not(:disabled):hover{transform:translateY(-3px)}
+#nightPlayerGrid .fx-selected,#dayPlayerGrid .fx-selected{animation:targetPulse .42s ease-out;}
+@keyframes targetPulse{0%{box-shadow:0 0 0 0 #93c5fd75}100%{box-shadow:0 0 0 14px #93c5fd00}}
+#timerDisplay.timer-urgent{color:#fb7185 !important; animation:timerUrgent .75s ease-in-out infinite alternate;}
+@keyframes timerUrgent{to{transform:scale(1.08);text-shadow:0 0 21px #f8717199}}
+#morningAnnouncementBox{overflow:hidden;}
+#morningAnnouncementBox::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% -30%,#fdba7426,transparent 66%);pointer-events:none;}
+#viewGameOver .wolf-card{overflow:hidden;}
+.phase-cinematic{position:fixed;inset:0;z-index:85;pointer-events:none;display:flex;justify-content:center;align-items:center;opacity:0;background:radial-gradient(circle,#071120e6,#03070ded);visibility:hidden;}
+.phase-cinematic.active{visibility:visible;animation:phaseVeil 2s ease both;}
+.phase-cinematic .cinematic-center{text-align:center;padding:22px;max-width:min(94vw,680px);}
+.cinematic-symbol{display:inline-flex;align-items:center;justify-content:center;width:75px;height:75px;border:1px solid #9dc4f377;border-radius:50%;margin-bottom:24px;background:#81b7e522;box-shadow:0 0 90px 18px #3682d031;animation:cinematicSymbol 1.45s ease both;}
+.cinematic-kicker{display:block;color:#9db7da;font:700 12px 'Quicksand',sans-serif;letter-spacing:.44em;text-transform:uppercase;}
+.cinematic-headline{display:block;margin-top:9px;color:white;text-shadow:0 2px 30px #d9d5b566;font:900 clamp(26px,5vw,48px) 'Cinzel',Georgia,serif;letter-spacing:.055em;}
+.phase-cinematic.day-scene{background:radial-gradient(circle,#58361eee,#190e0df0);}.phase-cinematic.day-scene .cinematic-symbol{background:#ffa33b26;color:#ffd192;border-color:#f59e0b75}
+.phase-cinematic.victory-scene{background:radial-gradient(circle,#44321ae8,#090d15f7)}.phase-cinematic.victory-scene .cinematic-symbol{background:#d69b1e36;color:#fde68a;border-color:#f7ce6485}
+.phase-cinematic.danger-scene{background:radial-gradient(circle,#43151be8,#090a11f7)}.phase-cinematic.danger-scene .cinematic-symbol{background:#ee444426;color:#feb4ad;border-color:#ef444489}
+@keyframes phaseVeil{0%{opacity:0}15%{opacity:1}58%{opacity:1}100%{opacity:0}}
+@keyframes cinematicSymbol{0%{opacity:0;transform:scale(.4) rotate(-18deg)}40%{opacity:1;transform:scale(1.06) rotate(0)}100%{opacity:1;transform:scale(1)}}
+.fx-vignette{position:fixed;inset:0;z-index:89;pointer-events:none;opacity:0;visibility:hidden;}
+.fx-vignette.burst{visibility:visible;animation:fxFlash .65s ease-out both;}
+.fx-vignette.red{box-shadow:inset 0 0 160px 35px #de2d4666}.fx-vignette.gold{box-shadow:inset 0 0 160px 35px #ffbc4766}.fx-vignette.green{box-shadow:inset 0 0 160px 35px #23d19955}.fx-vignette.blue{box-shadow:inset 0 0 160px 35px #60a5fa5c}
+@keyframes fxFlash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+#victoryConfetti{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;}
+.confetti-spark{position:absolute;top:-18px;width:6px;height:13px;border-radius:2px;opacity:0;animation:confettiFall var(--fall-time,3s) linear var(--fall-delay,0s) forwards;}
+@keyframes confettiFall{0%{opacity:0;transform:translate3d(0,-10px,0) rotate(0)}8%{opacity:1}84%{opacity:1}100%{opacity:0;transform:translate3d(var(--sway,30px),550px,0) rotate(var(--spin,580deg))}}
+#viewGameOver .wolf-card > *:not(#victoryConfetti){position:relative;z-index:2;}
+#viewSetup .fa-moon{animation:logoMoon 4s ease-in-out infinite alternate;}
+@keyframes logoMoon{to{transform:scale(1.12) rotate(7deg);filter:drop-shadow(0 0 14px #60a5fa8a)}}
+.audio-setting{display:flex;gap:14px;align-items:center;justify-content:space-between;}
+.audio-setting label{font-weight:700;font-size:12px;color:#d8e4f5;min-width:100px;}
+.audio-setting input[type="range"]{width:100%;accent-color:#93c5fd;cursor:pointer;}
+.audio-setting output{width:32px;text-align:right;color:#93c5fd;font-size:11px;font-weight:700;}
+.audio-check{display:flex;align-items:center;gap:10px;color:#d8e4f5;font-size:12px;font-weight:700;cursor:pointer;}
+.audio-check input{accent-color:#60a5fa;width:16px;height:16px;}
+#musicBtn .fa-music{color:#fbbf24;}
+body.motion-off *,body.motion-off *::before,body.motion-off *::after {animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important;}
+/* Keep the phase title legible even with reduced motion. */
+body.motion-off .phase-cinematic.active{animation:phaseVeil 1.15s ease both !important;}
+@media (prefers-reduced-motion:reduce){*:not(.phase-cinematic),*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}}
+@media(max-width:600px){.sky-orb{right:-22px;top:115px}.cinematic-symbol{width:62px;height:62px}.wolf-btn.tap-burst{animation:none}#viewGameOver .wolf-card{padding:1.35rem}.phase-cinematic .cinematic-headline{font-size:clamp(24px,8vw,36px)}header{padding-left:12px !important;padding-right:12px !important;gap:8px;} header .flex.items-center.space-x-2.sm\\:space-x-3{gap:5px !important;}#musicBtn,#ambienceBtn,#sfxBtn,#audioSettingsBtn{padding:9px !important;}}
+
+
+/* Slim header on phones: keep all audio controls reachable without wrapping. */
+@media (max-width: 600px) {
+ header { min-height: 60px; padding-top:10px !important; padding-bottom:10px !important; }
+ header > div:first-child { flex: 0 1 auto; min-width:0; gap:7px; }
+ header > div:first-child > div:first-child { width:31px; height:31px; min-width:31px; flex-shrink:0; border-radius:9px; }
+ header > div:first-child > div:nth-child(2) { min-width:0; }
+ header h1 { font-size:14px !important;line-height:1.15;white-space:nowrap;letter-spacing:.02em !important; }
+ #headerSubtitle {display:none;}
+ header > div:nth-child(2) {gap:5px !important;flex-shrink:0;}
+ header #musicBtn,header #ambienceBtn,header #sfxBtn,header #audioSettingsBtn,header button:has(> .fa-book-open){padding:8px !important;min-width:32px;justify-content:center;}
+ #viewNight #confirmNightActionBtn {width:100%;justify-content:center;}
+ #viewNight #nightInteractiveBox > .pt-4 {gap:8px;flex-wrap:wrap;}
+}
+@media (max-width:370px){header h1{font-size:11px !important;}header > div:nth-child(2){gap:3px !important;} header #musicBtn, header #ambienceBtn, header #sfxBtn,header #audioSettingsBtn,header button:has(> .fa-book-open){padding:6px !important;min-width:28px;}}
+
+        @media (max-width:600px){header > div:first-child > div:nth-child(2){display:none !important;} header > div:first-child{flex:0 0 auto;}}
+    
+/* Role-turn cover is shared by night-role actions AND daytime secret ballots. */
+#seerPrivacyShield {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 150 !important;
+    padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+#seerPrivacyShield.flex { display: flex; }
+#seerPrivacyShield.hidden { display: none !important; }
+#seerPrivacyShield > .wolf-card {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.mobile-vote-dock { display: none; }
+@media (max-width: 767px) {
+    body.wolves-day-view .mobile-vote-dock {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 45;
+        background: rgba(7, 12, 24, .97);
+        border-top: 1px solid rgba(248, 113, 113, .4);
+        box-shadow: 0 -12px 34px rgba(0, 0, 0, .45);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .mobile-vote-dock-inner {
+        display: flex;
+        max-width: 680px;
+        margin: auto;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .mobile-vote-dock-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+    .mobile-vote-dock-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .14em; color: #fca5a5; }
+    .mobile-vote-dock-hint { font-size: 12px; line-height: 1.35; color: #e2e8f0; overflow-wrap: anywhere; }
+    .mobile-vote-submit {
+        display: flex;
+        flex-shrink: 0;
+        min-width: 116px;
+        min-height: 48px;
+        padding: 12px 14px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+    body.wolves-day-view main { padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important; }
+    body.wolves-day-view #viewDay #submitVoteBtn { display: none !important; }
+}
+@media (max-width: 355px) {
+    .mobile-vote-dock-inner { gap: 7px; }
+    .mobile-vote-submit { min-width: 104px; padding: 10px; }
+}
+
+    
